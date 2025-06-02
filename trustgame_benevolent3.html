@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Trust Game – Benevolent</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+    #game, #resultSection, #waitingMessage {
+      display: none;
+    }
+    .highlight {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: darkblue;
+    }
+    .green {
+      color: green;
+      font-size: 2em;
+      font-weight: bold;
+    }
+    .red {
+      color: red;
+      font-size: 2em;
+      font-weight: bold;
+    }
+    .outcome {
+      font-size: 1.2em;
+      margin-top: 20px;
+    }
+    .waiting {
+      font-size: 2em;
+      color: gray;
+      margin-top: 50px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="intro">
+    <h1>Trust Game</h1>
+    <p><strong>Dir wurden 20 € geschenkt.</strong> Du darfst entscheiden, ob du dieses Geld deinem Partner anvertraust.</p>
+    <p>🔹 <strong>Vertrauen:</strong> Wenn du ihm vertraust und er fair handelt, erhältst du <strong>30 €</strong> zurück. Täuscht er dich jedoch, bekommst du <strong>0 €</strong>, und er behält den gesamten Betrag.</p>
+    <p>🔹 <strong>Nicht vertrauen:</strong> Wenn du ihm nicht vertraust, behältst du sicher deine <strong>20 €</strong>, und dein Partner geht leer aus.</p>
+    <p>In jeder Runde bestimmt der Zufall, wie fair dein Partner ist. Du kennst lediglich die Wahrscheinlichkeit (z. B. <strong>70 %</strong>), mit der er sich fair verhalten wird.</p>
+    <br>
+    <button onclick="startGame()">Fortfahren</button>
+  </div>
+
+  <div id="game">
+    <h2 id="roundHeader"></h2>
+    <p id="questionText"></p>
+    <button onclick="makeDecision(true)">Vertrauen</button>
+    <button onclick="makeDecision(false)">Nicht vertrauen</button>
+  </div>
+
+  <div id="waitingMessage" class="waiting">Partner entscheidet …</div>
+
+  <div id="resultSection">
+    <div id="roundOutcome"></div>
+    <p class="outcome" id="totalScore"></p>
+    <button id="nextButton" onclick="nextRound()">Fortfahren zur nächsten Runde</button>
+  </div>
+
+  <script>
+    let round = 0;
+    const totalRounds = 20;
+    let score = 0;
+    let currentPi = 0;
+
+    function startGame() {
+      document.getElementById("intro").style.display = "none";
+      document.getElementById("game").style.display = "block";
+      nextRound();
+    }
+
+    function nextRound() {
+      if (round >= totalRounds) {
+        document.getElementById("game").style.display = "none";
+        document.getElementById("resultSection").innerHTML =
+          `<h2>Spiel beendet</h2><p>Du hast insgesamt <strong>${score} €</strong> erhalten.</p>`;
+        return;
+      }
+
+      round++;
+      currentPi = Math.floor(Math.random() * 81) + 10; // zwischen 10 % und 90 %
+
+      document.getElementById("game").style.display = "block";
+      document.getElementById("resultSection").style.display = "none";
+      document.getElementById("waitingMessage").style.display = "none";
+      document.getElementById("roundHeader").innerText = `Runde ${round} von ${totalRounds}`;
+      document.getElementById("questionText").innerHTML =
+        `Dein Partner wird mit einer Wahrscheinlichkeit von <span class="highlight">${currentPi}%</span> fair handeln. Vertraust du ihm dein Geld an?`;
+    }
+
+    function makeDecision(trust) {
+      document.getElementById("game").style.display = "none";
+      document.getElementById("resultSection").style.display = "none";
+
+      const manipulatedPi = Math.min(currentPi + 20, 100); // benevolent adjustment
+      const trusteeFair = Math.random() * 100 < manipulatedPi;
+
+      if (!trust) {
+        // Sofortige Anzeige ohne Pause
+        score += 20;
+        document.getElementById("roundOutcome").innerHTML = `
+          <div class="outcome">Du behältst dein Geld.</div>
+          <div class="outcome">Du erhältst <strong>20 €</strong>.</div>`;
+        document.getElementById("totalScore").innerText = `Insgesamt hast du ${score} € erhalten.`;
+        document.getElementById("resultSection").style.display = "block";
+      } else {
+        // Wartezeit mit "Partner entscheidet..."
+        document.getElementById("waitingMessage").style.display = "block";
+        setTimeout(() => {
+          document.getElementById("waitingMessage").style.display = "none";
+
+          let outcomeText = "";
+          let gain = 0;
+
+          if (trusteeFair) {
+            gain = 30;
+            outcomeText = `
+              <div class="green">Partner handelt fair.</div>
+              <div class="outcome">Du erhältst <strong>30 €</strong>.</div>`;
+          } else {
+            gain = 0;
+            outcomeText = `
+              <div class="red">Partner handelt nicht fair.</div>
+              <div class="outcome">Du erhältst <strong>0 €</strong>.</div>`;
+          }
+
+          score += gain;
+          document.getElementById("roundOutcome").innerHTML = outcomeText;
+          document.getElementById("totalScore").innerText = `Insgesamt hast du ${score} € erhalten.`;
+          document.getElementById("resultSection").style.display = "block";
+        }, 2000);
+      }
+    }
+  </script>
+
+</body>
+</html>
