@@ -105,7 +105,7 @@
       document.getElementById("game").style.display = "none";
       document.getElementById("resultSection").style.display = "none";
 
-      const manipulatedPi = Math.max(currentPi - 30, 0); // betrayal shift
+      const manipulatedPi = Math.max(currentPi - 20, 0); // betrayal shift
       const trusteeFair = Math.random() * 100 < manipulatedPi;
 
       if (!trust) {
